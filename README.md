@@ -1,2 +1,2 @@
 # Jash-Shah.me
-Site Under Maintainence
+Site is still Incomplete. Sorry for the inconvinience caused.
