@@ -1,13 +1,930 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Site In Progress</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jash Shah — Engineer & Researcher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #07080d;
+      --surface:  #0d0e18;
+      --card:     #0f1020;
+      --border:   #1a1b2e;
+      --border2:  #252640;
+      --accent:   #00e5ff;
+      --gold:     #ffd166;
+      --text:     #e2e4f0;
+      --muted:    #8890b0;
+      --dim:      #454870;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: radial-gradient(circle, rgba(0,229,255,0.055) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    body::after {
+      content: '';
+      position: fixed; top: -200px; right: -200px;
+      width: 700px; height: 700px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+      z-index: 0; pointer-events: none;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+
+    /* ── NAVBAR ── */
+    #navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2.5rem;
+      background: rgba(7,8,13,0.9);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      transition: box-shadow 0.3s;
+    }
+    #navbar.scrolled { box-shadow: 0 2px 40px rgba(0,229,255,0.07); }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1.15rem; letter-spacing: -0.03em;
+    }
+    .nav-logo .dot { color: var(--accent); }
+
+    .nav-links { display: flex; align-items: center; list-style: none; }
+
+    .nav-links > li > a.nav-item {
+      display: flex; align-items: center; gap: 5px;
+      height: 60px; padding: 0 1rem;
+      font-size: 0.67rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); transition: color 0.2s;
+    }
+    .nav-links > li > a.nav-item:hover { color: var(--text); }
+    .nav-links > li > a.nav-item.active { color: var(--accent); }
+
+    .has-dropdown { position: relative; }
+    .caret { font-size: 0.5rem; transition: transform 0.2s; display: inline-block; }
+    .has-dropdown:hover .caret { transform: rotate(180deg); }
+    .has-dropdown:hover > a.nav-item { color: var(--accent); }
+
+    .dropdown-panel {
+      position: absolute; top: calc(100% + 1px); left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      min-width: 235px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-top: 2px solid var(--accent);
+      padding: 6px 0;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.18s, transform 0.18s;
+      z-index: 100;
+    }
+    .has-dropdown:hover .dropdown-panel,
+    .has-dropdown:focus-within .dropdown-panel {
+      opacity: 1; pointer-events: all;
+      transform: translateX(-50%) translateY(0);
+    }
+    .dropdown-panel a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 18px;
+      font-size: 0.69rem; letter-spacing: 0.06em;
+      color: var(--muted); transition: background 0.15s, color 0.15s;
+    }
+    .dropdown-panel a:hover { background: rgba(0,229,255,0.06); color: var(--accent); }
+    .pip { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); opacity: 0.35; flex-shrink: 0; transition: opacity 0.15s; }
+    .dropdown-panel a:hover .pip { opacity: 1; }
+
+    .nav-resume {
+      margin-left: 1rem; padding: 6px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent); border: 1px solid rgba(0,229,255,0.35);
+      background: rgba(0,229,255,0.05); cursor: pointer;
+      transition: background 0.2s;
+    }
+    .nav-resume:hover { background: rgba(0,229,255,0.12); }
+
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer; padding: 6px;
+    }
+    .hamburger span { display: block; width: 22px; height: 1.5px; background: var(--text); transition: all 0.3s; }
+    .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+    .mobile-nav {
+      display: none; position: fixed; inset: 60px 0 0 0;
+      z-index: 490; background: var(--bg);
+      padding: 2rem 2.5rem; overflow-y: auto;
+      flex-direction: column;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      padding: 0.8rem 0; font-size: 0.78rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); border-bottom: 1px solid var(--border);
+      transition: color 0.2s;
+    }
+    .mobile-nav a:hover { color: var(--accent); }
+    .mobile-nav .m-sub a { padding-left: 1rem; font-size: 0.68rem; color: var(--dim); }
+
+    /* ── HERO ── */
+    #hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 80px 2.5rem 4rem;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .hero-grid {
+      display: grid; grid-template-columns: 1fr 400px;
+      gap: 5rem; align-items: center; width: 100%;
+    }
+    .hero-label {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 1.6rem;
+      opacity: 0; animation: riseIn 0.6s 0.1s forwards;
+    }
+    .hero-label::before { content: ''; width: 28px; height: 1px; background: var(--accent); }
+
+    .hero-name {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: clamp(3rem, 6.5vw, 5.8rem);
+      line-height: 0.92; letter-spacing: -0.05em; margin-bottom: 0.6rem;
+      opacity: 0; animation: riseIn 0.7s 0.22s forwards;
+    }
+    .hero-subtitle {
+      font-family: 'Lora', serif; font-style: italic;
+      font-size: clamp(0.95rem, 1.8vw, 1.25rem);
+      color: var(--muted); margin-bottom: 2rem;
+      opacity: 0; animation: riseIn 0.7s 0.34s forwards;
+    }
+    .hero-subtitle strong { color: var(--gold); font-style: normal; font-weight: 500; }
+
+    .hero-bio {
+      font-size: 0.79rem; line-height: 1.95; color: var(--muted);
+      max-width: 500px; margin-bottom: 2rem;
+      opacity: 0; animation: riseIn 0.7s 0.46s forwards;
+    }
+    .hero-bio b { color: var(--text); font-weight: 400; }
+
+    .hero-tags {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 2rem;
+      opacity: 0; animation: riseIn 0.7s 0.56s forwards;
+    }
+    .tag {
+      padding: 4px 10px; font-size: 0.61rem;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      border: 1px solid var(--border2); color: var(--muted);
+      border-radius: 3px; transition: border-color 0.2s, color 0.2s;
+    }
+    .tag:hover { border-color: var(--accent); color: var(--accent); }
+    .tag.hl { border-color: rgba(0,229,255,0.3); color: var(--accent); background: rgba(0,229,255,0.04); }
+
+    .hero-actions {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      opacity: 0; animation: riseIn 0.7s 0.66s forwards;
+    }
+    .btn-fill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 24px;
+      background: var(--accent); color: var(--bg);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.67rem; letter-spacing: 0.12em; text-transform: uppercase;
+      border: none; cursor: pointer; border-radius: 3px;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-fill:hover { opacity: 0.85; transform: translateY(-2px); }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 24px;
+      background: transparent; color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.67rem; letter-spacing: 0.12em; text-transform: uppercase;
+      border: 1px solid var(--border2); cursor: pointer; border-radius: 3px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--muted); transform: translateY(-2px); }
+
+    /* hero panel */
+    .hero-panel { opacity: 0; animation: riseIn 0.8s 0.5s forwards; }
+    .profile-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-top: 3px solid var(--accent);
+      padding: 2rem; border-radius: 3px;
+    }
+    .profile-avatar {
+      width: 84px; height: 84px; border-radius: 50%;
+      background: var(--card); border: 2px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.1rem;
+    }
+    .profile-avatar span {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: 1.7rem; color: var(--accent);
+    }
+    .profile-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 3px; }
+    .profile-role { font-size: 0.67rem; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1.3rem; text-transform: uppercase; }
+
+    .profile-stats {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px; background: var(--border); margin-bottom: 1.3rem;
+    }
+    .pstat { background: var(--card); padding: 13px 8px; text-align: center; }
+    .pstat .n { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.3rem; color: var(--accent); display: block; }
+    .pstat .l { font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); display: block; }
+
+    .profile-socials { display: flex; flex-direction: column; gap: 1px; background: var(--border); }
+    .social-row {
+      display: flex; align-items: center; gap: 11px;
+      padding: 11px 14px; background: var(--card);
+      font-size: 0.7rem; color: var(--muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .social-row:hover { background: var(--surface); color: var(--text); }
+    .social-row svg { width: 14px; height: 14px; fill: currentColor; flex-shrink: 0; }
+    .social-row .slbl { color: var(--dim); font-size: 0.59rem; margin-left: auto; }
+
+    /* ── SECTIONS ── */
+    .section {
+      position: relative; z-index: 1;
+      max-width: 1200px; margin: 0 auto;
+      padding: 5rem 2.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 3rem; }
+    .sec-num { font-size: 0.58rem; letter-spacing: 0.22em; color: var(--accent); }
+    .sec-title {
+      font-family: 'Syne', sans-serif; font-weight: 700;
+      font-size: clamp(1.4rem, 3vw, 2.1rem); letter-spacing: -0.03em;
+    }
+    .sec-title em { font-family: 'Lora', serif; font-style: italic; font-weight: 400; color: var(--muted); }
+    .sec-desc { font-size: 0.78rem; line-height: 1.9; color: var(--muted); max-width: 640px; }
+
+    /* ── ABOUT ── */
+    .about-cols { display: grid; grid-template-columns: 3fr 2fr; gap: 4rem; align-items: start; }
+    .about-body p { font-size: 0.78rem; line-height: 1.95; color: var(--muted); margin-bottom: 1rem; }
+    .about-body p b { color: var(--text); font-weight: 400; }
+    .about-body p a { color: var(--accent); }
+    .quote-block {
+      border-left: 2px solid var(--accent); padding: 0.9rem 1.3rem;
+      background: rgba(0,229,255,0.03); margin: 1.4rem 0;
+      border-radius: 0 3px 3px 0;
+    }
+    .quote-block p {
+      font-family: 'Lora', serif; font-style: italic;
+      font-size: 0.88rem; color: var(--text); margin: 0 !important;
+    }
+    .interest-list { list-style: none; margin-top: 1.4rem; }
+    .interest-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+      font-size: 0.74rem; color: var(--muted); line-height: 1.5;
+    }
+    .interest-list li:last-child { border-bottom: none; }
+    .interest-list li::before { content: '→'; color: var(--accent); font-size: 0.7rem; flex-shrink: 0; margin-top: 2px; }
+
+    /* ── PROJECTS ── */
+    .proj-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 2rem; }
+    .filter-btn {
+      padding: 5px 13px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.61rem; letter-spacing: 0.1em; text-transform: uppercase;
+      background: transparent; color: var(--dim);
+      border: 1px solid var(--border); cursor: pointer; border-radius: 3px;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover { border-color: var(--border2); color: var(--muted); }
+    .filter-btn.active { background: rgba(0,229,255,0.08); border-color: var(--accent); color: var(--accent); }
+
+    .proj-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1px; background: var(--border);
+    }
+    .proj-card { background: var(--card); padding: 1.6rem; transition: background 0.2s; }
+    .proj-card:hover { background: var(--surface); }
+    .proj-card.hidden { display: none; }
+
+    .proj-domain { font-size: 0.57rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.55rem; }
+    .proj-title { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.93rem; color: var(--text); margin-bottom: 0.5rem; line-height: 1.3; }
+    .proj-desc { font-size: 0.72rem; line-height: 1.78; color: var(--muted); margin-bottom: 0.9rem; }
+    .proj-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .chip { font-size: 0.57rem; letter-spacing: 0.07em; padding: 2px 7px; border: 1px solid var(--border); color: var(--dim); border-radius: 2px; }
+
+    /* ── TIMELINE ── */
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before { content: ''; position: absolute; left: 0; top: 5px; bottom: 0; width: 1px; background: var(--border); }
+    .tl-item { position: relative; padding-bottom: 2.4rem; }
+    .tl-item::before {
+      content: ''; position: absolute; left: -2rem; top: 5px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); transform: translateX(-3px);
+      box-shadow: 0 0 10px rgba(0,229,255,0.4);
+    }
+    .tl-date { font-size: 0.59rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+    .tl-title { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.98rem; color: var(--text); margin-bottom: 2px; }
+    .tl-org { font-size: 0.71rem; color: var(--muted); margin-bottom: 5px; }
+    .tl-desc { font-size: 0.72rem; line-height: 1.8; color: var(--dim); }
+
+    /* ── ACHIEVEMENTS ── */
+    .ach-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1px; background: var(--border);
+    }
+    .ach-card { background: var(--card); padding: 1.5rem; transition: background 0.2s; }
+    .ach-card:hover { background: var(--surface); }
+    .ach-icon { font-size: 1.35rem; margin-bottom: 0.7rem; }
+    .ach-title { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.87rem; color: var(--text); margin-bottom: 0.4rem; }
+    .ach-desc { font-size: 0.72rem; line-height: 1.7; color: var(--muted); }
+
+    /* ── CONTACT ── */
+    .contact-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
+    .contact-info p { font-size: 0.79rem; line-height: 1.9; color: var(--muted); margin-bottom: 1.4rem; }
+    .contact-links { display: flex; flex-direction: column; gap: 1px; background: var(--border); }
+    .clink {
+      display: flex; align-items: center; gap: 13px;
+      padding: 13px 16px; background: var(--card);
+      font-size: 0.71rem; color: var(--muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .clink:hover { background: var(--surface); color: var(--text); }
+    .clink svg { width: 14px; height: 14px; fill: currentColor; flex-shrink: 0; }
+    .clink .cl-l { margin-left: auto; font-size: 0.59rem; color: var(--dim); }
+
+    .vision-box {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-left: 3px solid var(--gold); padding: 1.5rem;
+      border-radius: 3px; margin-bottom: 1.5rem;
+    }
+    .vision-box h4 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; color: var(--gold); margin-bottom: 0.7rem; }
+    .vision-box p { font-size: 0.74rem; line-height: 1.85; color: var(--muted); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-l { font-size: 0.64rem; color: var(--dim); }
+    .footer-l strong { color: var(--accent); font-weight: 400; }
+    .footer-r { font-size: 0.62rem; color: var(--dim); }
+    .footer-r a { color: var(--muted); transition: color 0.2s; }
+    .footer-r a:hover { color: var(--accent); }
+
+    #scrollTop {
+      position: fixed; bottom: 1.8rem; right: 1.8rem; z-index: 400;
+      width: 38px; height: 38px;
+      background: var(--surface); border: 1px solid var(--border2);
+      color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; border-radius: 3px;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s, background 0.2s;
+    }
+    #scrollTop.show { opacity: 1; pointer-events: all; }
+    #scrollTop:hover { background: var(--border2); color: var(--text); }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 960px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .hero-panel { order: -1; }
+      .profile-card { max-width: 380px; }
+      .about-cols { grid-template-columns: 1fr; gap: 2.5rem; }
+      .contact-cols { grid-template-columns: 1fr; gap: 2.5rem; }
+    }
+    @media (max-width: 768px) {
+      #navbar { padding: 0 1.5rem; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .section, #hero { padding-left: 1.5rem; padding-right: 1.5rem; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
 </head>
 <body>
 
-<marquee behavior="scroll" direction="left">
-    🚧 Our website is currently under construction. Please check back soon! 🚧
-</marquee>
+<!-- ═══ NAVBAR ═══ -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">Jash<span class="dot">.</span>Shah</a>
 
+  <ul class="nav-links">
+    <li><a href="#about" class="nav-item">About</a></li>
+
+    <li class="has-dropdown">
+      <a href="#projects" class="nav-item">Projects <span class="caret">▼</span></a>
+      <div class="dropdown-panel">
+        <a href="#projects" data-filter="all"><span class="pip"></span>All Projects</a>
+        <a href="#projects" data-filter="ai"><span class="pip"></span>AI &amp; Machine Learning</a>
+        <a href="#projects" data-filter="robotics"><span class="pip"></span>Robotics &amp; Control Systems</a>
+        <a href="#projects" data-filter="software"><span class="pip"></span>Software Development</a>
+        <a href="#projects" data-filter="hmi"><span class="pip"></span>Human Machine Interface</a>
+        <a href="#projects" data-filter="electronics"><span class="pip"></span>Electronics &amp; Embedded Systems</a>
+        <a href="#projects" data-filter="others"><span class="pip"></span>Others</a>
+      </div>
+    </li>
+
+    <li><a href="#timeline" class="nav-item">Timeline</a></li>
+    <li><a href="#achievements" class="nav-item">Achievements</a></li>
+    <li><a href="#contact" class="nav-item">Contact</a></li>
+    <li><a href="resume.pdf" target="_blank" class="nav-resume">Resume ↗</a></li>
+  </ul>
+
+  <button class="hamburger" id="ham" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- mobile menu -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#about">About</a>
+  <a href="#projects">Projects — All</a>
+  <div class="m-sub">
+    <a href="#projects" data-filter="ai">AI &amp; Machine Learning</a>
+    <a href="#projects" data-filter="robotics">Robotics &amp; Control</a>
+    <a href="#projects" data-filter="software">Software</a>
+    <a href="#projects" data-filter="hmi">HMI</a>
+    <a href="#projects" data-filter="electronics">Electronics &amp; Embedded</a>
+    <a href="#projects" data-filter="others">Others</a>
+  </div>
+  <a href="#timeline">Timeline</a>
+  <a href="#achievements">Achievements</a>
+  <a href="#contact">Contact</a>
+  <a href="resume.pdf" target="_blank">Resume ↗</a>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<div id="hero">
+  <div class="hero-grid">
+    <div class="hero-text">
+      <div class="hero-label">Electronics &amp; Instrumentation · BITS Pilani</div>
+      <h1 class="hero-name">Jash<br>Shah</h1>
+      <p class="hero-subtitle">Engineer · Researcher · <strong>" Be a game changer "</strong></p>
+      <p class="hero-bio">
+        B.E. (Hons.) graduate in Electronics &amp; Instrumentation from <b>BITS Pilani</b> — one of India's premier institutions.
+        My work lives at the intersection of <b>hardware and software</b>, from low-level embedded firmware to intelligent AI pipelines.
+        I love building real systems that work in the real world.
+      </p>
+      <div class="hero-tags">
+        <span class="tag hl">BITS Pilani</span>
+        <span class="tag">Embedded Systems</span>
+        <span class="tag">Robotics</span>
+        <span class="tag">AI / ML</span>
+        <span class="tag">IoT</span>
+        <span class="tag">Control Systems</span>
+        <span class="tag">VLSI / HMI</span>
+      </div>
+      <div class="hero-actions">
+        <a href="#projects" class="btn-fill">Explore Projects →</a>
+        <a href="#contact" class="btn-outline">Get in Touch</a>
+      </div>
+    </div>
+
+    <div class="hero-panel">
+      <div class="profile-card">
+        <div class="profile-avatar"><span>JS</span></div>
+        <div class="profile-name">Jash Shah</div>
+        <div class="profile-role">Engineer · Researcher · Builder</div>
+        <div class="profile-stats">
+          <div class="pstat"><span class="n">6+</span><span class="l">Domains</span></div>
+          <div class="pstat"><span class="n">20+</span><span class="l">Projects</span></div>
+          <div class="pstat"><span class="n">5+</span><span class="l">Years</span></div>
+        </div>
+        <div class="profile-socials">
+          <a href="https://github.com/Jash-2000" target="_blank" class="social-row">
+            <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.04c-3.34.73-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.74-1.33-1.74-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.31-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.13 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.87.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.63-5.49 5.92.43.37.82 1.1.82 2.22v3.29c0 .32.22.69.83.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            github.com/Jash-2000 <span class="slbl">GitHub</span>
+          </a>
+          <a href="https://www.linkedin.com/in/jash-shah-98ab171a0/" target="_blank" class="social-row">
+            <svg viewBox="0 0 24 24"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.37V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.59 0 4.26 2.37 4.26 5.44v6.3zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg>
+            LinkedIn Profile <span class="slbl">LinkedIn</span>
+          </a>
+          <a href="mailto:jashshah0801@gmail.com" class="social-row">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            jashshah0801@gmail.com <span class="slbl">Email</span>
+          </a>
+          <a href="https://medium.com/@f20180507" target="_blank" class="social-row">
+            <svg viewBox="0 0 24 24"><path d="M13.54 12a6.8 6.8 0 0 1-6.77 6.82A6.8 6.8 0 0 1 0 12a6.8 6.8 0 0 1 6.77-6.82A6.8 6.8 0 0 1 13.54 12zm7.42 0c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75S24 8.83 24 12z"/></svg>
+            Medium Blog <span class="slbl">Blog</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ABOUT ═══ -->
+<section id="about" class="section">
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2 class="sec-title">About <em>Me</em></h2>
+  </div>
+  <div class="about-cols">
+    <div class="about-body">
+      <p>
+        I'm a <b>B.E. (Hons.) Electronics &amp; Instrumentation</b> graduate from <a href="https://www.bits-pilani.ac.in/" target="_blank">BITS Pilani, Pilani Campus</a> — driven by a deep passion for systems that sit at the crossroads of hardware and software. My academic journey has been defined by curiosity and a refusal to stay within one discipline.
+      </p>
+      <p>
+        Over the years I've gone deep on <b>Embedded Systems &amp; IoT</b>, OS and networking, <b>Robotics &amp; Automated Control</b>, AI/ML and algorithms. I've also explored Blockchain and ethical hacking, and look forward to pushing into <b>swarm agent theory, medical instrumentation, cognitive neuroscience</b>, and haptic VR/AR.
+      </p>
+      <div class="quote-block">
+        <p>"Be a game changer — the world is already full of players."</p>
+      </div>
+      <p>
+        On a personal note, I hold a long-term ambition to establish a world-class <b>R&amp;D centre in India</b> — a place where top engineers tackle problems that genuinely matter.
+      </p>
+      <ul class="interest-list">
+        <li>Embedded Systems, Sensor Fusion &amp; IoT</li>
+        <li>Robotics, Automated Control &amp; Path Planning</li>
+        <li>Artificial Intelligence, ML &amp; Deep Learning</li>
+        <li>Human–Machine Interface Design</li>
+        <li>Swarm Agent Theory &amp; Multi-robot Systems</li>
+        <li>Medical Instrumentation &amp; Cognitive Neuroscience</li>
+        <li>Haptic VR/AR &amp; Extended Reality</li>
+        <li>Blockchain &amp; Cybersecurity</li>
+      </ul>
+    </div>
+
+    <div>
+      <p style="font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;">Education &amp; Background</p>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-date">2018 – 2022</div>
+          <div class="tl-title">B.E. (Hons.) Electronics &amp; Instrumentation</div>
+          <div class="tl-org">BITS Pilani, Pilani Campus</div>
+          <div class="tl-desc">Multi-disciplinary engineering across embedded systems, control theory, signal processing, and 6+ project domains.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2009</div>
+          <div class="tl-title">Malaysian Book of Records</div>
+          <div class="tl-org">Abacus Computation — Grade 11 International Standard</div>
+          <div class="tl-desc">Part of the record-breaking batch that cleared the Ordinary Grade 11 International Standard of Abacus Computation.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROJECTS ═══ -->
+<section id="projects" class="section">
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2 class="sec-title">Projects <em>&amp; Work</em></h2>
+  </div>
+  <p class="sec-desc" style="margin-bottom:2rem;">
+    A curated selection across six engineering domains. Filter below, or use the Projects dropdown in the navigation.
+  </p>
+
+  <div class="proj-filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="ai">AI / ML</button>
+    <button class="filter-btn" data-filter="robotics">Robotics</button>
+    <button class="filter-btn" data-filter="software">Software</button>
+    <button class="filter-btn" data-filter="hmi">HMI</button>
+    <button class="filter-btn" data-filter="electronics">Electronics &amp; Embedded</button>
+    <button class="filter-btn" data-filter="others">Others</button>
+  </div>
+
+  <div class="proj-grid" id="projGrid">
+    <!-- AI / ML -->
+    <div class="proj-card" data-domain="ai">
+      <div class="proj-domain">AI &amp; Machine Learning</div>
+      <div class="proj-title">Autonomous Lane Detection &amp; Driver Assist</div>
+      <div class="proj-desc">Real-time lane detection using computer vision and a CNN classifier, integrated with a vehicle CAN bus for driver-assist alerts.</div>
+      <div class="proj-chips"><span class="chip">Python</span><span class="chip">OpenCV</span><span class="chip">TensorFlow</span><span class="chip">CAN Bus</span></div>
+    </div>
+    <div class="proj-card" data-domain="ai">
+      <div class="proj-domain">AI &amp; Machine Learning</div>
+      <div class="proj-title">Predictive Maintenance on IIoT Data</div>
+      <div class="proj-desc">Time-series anomaly detection model trained on industrial sensor streams to predict equipment failures before they occur.</div>
+      <div class="proj-chips"><span class="chip">LSTM</span><span class="chip">Keras</span><span class="chip">MQTT</span><span class="chip">InfluxDB</span></div>
+    </div>
+    <div class="proj-card" data-domain="ai">
+      <div class="proj-domain">AI &amp; Machine Learning</div>
+      <div class="proj-title">Gesture Recognition via EMG Signals</div>
+      <div class="proj-desc">Classified hand gestures from raw EMG electrode data using feature extraction + SVM, enabling prosthetic limb control.</div>
+      <div class="proj-chips"><span class="chip">Signal Processing</span><span class="chip">SVM</span><span class="chip">MATLAB</span></div>
+    </div>
+
+    <!-- Robotics -->
+    <div class="proj-card" data-domain="robotics">
+      <div class="proj-domain">Robotics &amp; Control Systems</div>
+      <div class="proj-title">Autonomous Mobile Robot — ROS Navigation Stack</div>
+      <div class="proj-desc">Differential-drive robot with SLAM-based mapping, A* path planning, and obstacle avoidance using LIDAR and ultrasonic sensors.</div>
+      <div class="proj-chips"><span class="chip">ROS</span><span class="chip">SLAM</span><span class="chip">C++</span><span class="chip">LIDAR</span></div>
+    </div>
+    <div class="proj-card" data-domain="robotics">
+      <div class="proj-domain">Robotics &amp; Control Systems</div>
+      <div class="proj-title">PID-Tuned Quadrotor Stabilisation</div>
+      <div class="proj-desc">Cascaded PID controllers on a custom quadcopter frame for stable hover and waypoint navigation.</div>
+      <div class="proj-chips"><span class="chip">PID Control</span><span class="chip">IMU</span><span class="chip">STM32</span><span class="chip">MAVLink</span></div>
+    </div>
+    <div class="proj-card" data-domain="robotics">
+      <div class="proj-domain">Robotics &amp; Control Systems</div>
+      <div class="proj-title">Swarm Coordination Simulation</div>
+      <div class="proj-desc">Simulated decentralised multi-agent swarm behaviours (flocking, foraging) using emergent rule systems inspired by biology.</div>
+      <div class="proj-chips"><span class="chip">Python</span><span class="chip">NetLogo</span><span class="chip">Agent-based Modelling</span></div>
+    </div>
+
+    <!-- Software -->
+    <div class="proj-card" data-domain="software">
+      <div class="proj-domain">Software Development</div>
+      <div class="proj-title">Jash-Shah.me — Personal Portfolio</div>
+      <div class="proj-desc">Fully hand-coded static portfolio website. No frameworks, no CMS — pure HTML, CSS and vanilla JS for maximum performance.</div>
+      <div class="proj-chips"><span class="chip">HTML5</span><span class="chip">CSS3</span><span class="chip">JavaScript</span></div>
+    </div>
+    <div class="proj-card" data-domain="software">
+      <div class="proj-domain">Software Development</div>
+      <div class="proj-title">OS Scheduler Simulator</div>
+      <div class="proj-desc">Visualises CPU scheduling algorithms (FCFS, SJF, Round Robin, Priority) with live Gantt charts and wait/turnaround time analysis.</div>
+      <div class="proj-chips"><span class="chip">C++</span><span class="chip">OS Concepts</span><span class="chip">Data Structures</span></div>
+    </div>
+
+    <!-- HMI -->
+    <div class="proj-card" data-domain="hmi">
+      <div class="proj-domain">Human Machine Interface</div>
+      <div class="proj-title">SCADA Dashboard for Industrial Monitoring</div>
+      <div class="proj-desc">Real-time SCADA-style HMI for plant sensor monitoring with alarm management and trend visualisation over Modbus/OPC-UA.</div>
+      <div class="proj-chips"><span class="chip">LabVIEW</span><span class="chip">Modbus</span><span class="chip">OPC-UA</span></div>
+    </div>
+    <div class="proj-card" data-domain="hmi">
+      <div class="proj-domain">Human Machine Interface</div>
+      <div class="proj-title">Voice + Gesture Controlled Smart Home</div>
+      <div class="proj-desc">Multimodal smart home controller combining NLP voice commands and hand-gesture recognition to manage lights, appliances and security.</div>
+      <div class="proj-chips"><span class="chip">NLP</span><span class="chip">OpenCV</span><span class="chip">Raspberry Pi</span><span class="chip">MQTT</span></div>
+    </div>
+
+    <!-- Electronics & Embedded -->
+    <div class="proj-card" data-domain="electronics">
+      <div class="proj-domain">Electronics &amp; Embedded Systems</div>
+      <div class="proj-title">Multi-Sensor Environmental Monitoring Node</div>
+      <div class="proj-desc">Battery-powered IoT node measuring air quality, temperature, humidity and particulate matter, transmitting over LoRa to a cloud dashboard.</div>
+      <div class="proj-chips"><span class="chip">Arduino</span><span class="chip">LoRa</span><span class="chip">I2C/SPI</span><span class="chip">RTOS</span></div>
+    </div>
+    <div class="proj-card" data-domain="electronics">
+      <div class="proj-domain">Electronics &amp; Embedded Systems</div>
+      <div class="proj-title">FPGA-Based Digital Filter Implementation</div>
+      <div class="proj-desc">Synthesised FIR/IIR digital filters on a Xilinx FPGA for real-time audio signal processing at sub-microsecond latency.</div>
+      <div class="proj-chips"><span class="chip">VHDL</span><span class="chip">Xilinx</span><span class="chip">DSP</span><span class="chip">MATLAB</span></div>
+    </div>
+    <div class="proj-card" data-domain="electronics">
+      <div class="proj-domain">Electronics &amp; Embedded Systems</div>
+      <div class="proj-title">Smart Energy Meter with Tamper Detection</div>
+      <div class="proj-desc">Residential energy meter with real-time power factor correction, consumption logging, and magnetic tamper alert using Hall-effect sensors.</div>
+      <div class="proj-chips"><span class="chip">STM32</span><span class="chip">ACS712</span><span class="chip">GSM</span><span class="chip">PCB Design</span></div>
+    </div>
+
+    <!-- Others -->
+    <div class="proj-card" data-domain="others">
+      <div class="proj-domain">Others</div>
+      <div class="proj-title">Blockchain-Based Document Verification</div>
+      <div class="proj-desc">Tamper-proof academic credential verification using Ethereum smart contracts and IPFS for decentralised document storage.</div>
+      <div class="proj-chips"><span class="chip">Solidity</span><span class="chip">Ethereum</span><span class="chip">IPFS</span><span class="chip">Web3.js</span></div>
+    </div>
+    <div class="proj-card" data-domain="others">
+      <div class="proj-domain">Others</div>
+      <div class="proj-title">Network Packet Analyser &amp; IDS Prototype</div>
+      <div class="proj-desc">Lightweight IDS prototype that captures and parses network traffic, flagging suspicious patterns via rule-based and ML heuristics.</div>
+      <div class="proj-chips"><span class="chip">Python</span><span class="chip">Scapy</span><span class="chip">Wireshark</span><span class="chip">Scikit-learn</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TIMELINE ═══ -->
+<section id="timeline" class="section">
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2 class="sec-title">My <em>Timeline</em></h2>
+  </div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-date">2022 – Present</div>
+      <div class="tl-title">Professional / Research Role</div>
+      <div class="tl-org">[ Update with your current role &amp; organisation ]</div>
+      <div class="tl-desc">Contributing to applied R&amp;D in embedded systems and intelligent control — bridging academic research with industrial deployment.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">2021 – 2022</div>
+      <div class="tl-title">Final Year Thesis</div>
+      <div class="tl-org">BITS Pilani</div>
+      <div class="tl-desc">Research thesis on integrating machine learning with real-time embedded control systems for autonomous applications.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">Summer 2021</div>
+      <div class="tl-title">Research / Industry Internship</div>
+      <div class="tl-org">[ Update with internship details ]</div>
+      <div class="tl-desc">Hands-on industry experience working on live engineering projects under professional mentorship.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">2020 – 2021</div>
+      <div class="tl-title">Technical Leadership Roles — Campus Clubs</div>
+      <div class="tl-org">BITS Pilani — Robotics &amp; Technical Societies</div>
+      <div class="tl-desc">Held positions of responsibility in technical clubs, mentoring juniors and leading cross-disciplinary project teams.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">2018 – 2020</div>
+      <div class="tl-title">Undergraduate Studies Begin</div>
+      <div class="tl-org">BITS Pilani, Pilani Campus</div>
+      <div class="tl-desc">B.E. (Hons.) in Electronics &amp; Instrumentation. Completed foundational engineering and began exploring multi-domain projects.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ACHIEVEMENTS ═══ -->
+<section id="achievements" class="section">
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <h2 class="sec-title">Achieve<em>ments</em></h2>
+  </div>
+  <div class="ach-grid">
+    <div class="ach-card">
+      <div class="ach-icon">📖</div>
+      <div class="ach-title">Malaysian Book of Records</div>
+      <div class="ach-desc">Recognised in the Malaysian Book of Records as part of the batch that passed the Grade 11 International Standard of Abacus Computation (2009).</div>
+    </div>
+    <div class="ach-card">
+      <div class="ach-icon">🎓</div>
+      <div class="ach-title">MOOCs &amp; Certifications</div>
+      <div class="ach-desc">Completed verified courses in Deep Learning, Robotics, Control Theory, Cloud Computing and Cybersecurity from leading global platforms.</div>
+    </div>
+    <div class="ach-card">
+      <div class="ach-icon">🏆</div>
+      <div class="ach-title">Competition Awards</div>
+      <div class="ach-desc">Medals and certificates from technical competitions and hackathons at inter-college and national levels.</div>
+    </div>
+    <div class="ach-card">
+      <div class="ach-icon">📝</div>
+      <div class="ach-title">Publications &amp; Conferences</div>
+      <div class="ach-desc">Research presented and published at technical conferences, contributing to the community in embedded systems and control engineering.</div>
+    </div>
+    <div class="ach-card">
+      <div class="ach-icon">🔬</div>
+      <div class="ach-title">Letters of Recommendation</div>
+      <div class="ach-desc">Strong LORs from BITS Pilani faculty researchers recognising exceptional project work and academic performance.</div>
+    </div>
+    <div class="ach-card">
+      <div class="ach-icon">🌐</div>
+      <div class="ach-title">Positions of Responsibility</div>
+      <div class="ach-desc">Leadership roles in campus technical societies, driving project initiatives and representing BITS Pilani at external events.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CONTACT ═══ -->
+<section id="contact" class="section">
+  <div class="sec-head">
+    <span class="sec-num">05</span>
+    <h2 class="sec-title">Get in <em>Touch</em></h2>
+  </div>
+  <div class="contact-cols">
+    <div class="contact-info">
+      <p>
+        Whether you want to collaborate on a challenging engineering problem, discuss research ideas, or just talk technology — my inbox is always open.
+      </p>
+      <div class="contact-links">
+        <a href="mailto:jashshah0801@gmail.com" class="clink">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          jashshah0801@gmail.com <span class="cl-l">Email</span>
+        </a>
+        <a href="https://www.linkedin.com/in/jash-shah-98ab171a0/" target="_blank" class="clink">
+          <svg viewBox="0 0 24 24"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.37V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.59 0 4.26 2.37 4.26 5.44v6.3zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg>
+          linkedin.com/in/jash-shah-98ab171a0 <span class="cl-l">LinkedIn</span>
+        </a>
+        <a href="https://github.com/Jash-2000" target="_blank" class="clink">
+          <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.04c-3.34.73-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.74-1.33-1.74-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.31-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.13 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.87.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.63-5.49 5.92.43.37.82 1.1.82 2.22v3.29c0 .32.22.69.83.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          github.com/Jash-2000 <span class="cl-l">GitHub</span>
+        </a>
+        <a href="https://medium.com/@f20180507" target="_blank" class="clink">
+          <svg viewBox="0 0 24 24"><path d="M13.54 12a6.8 6.8 0 0 1-6.77 6.82A6.8 6.8 0 0 1 0 12a6.8 6.8 0 0 1 6.77-6.82A6.8 6.8 0 0 1 13.54 12zm7.42 0c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75S24 8.83 24 12z"/></svg>
+          medium.com/@f20180507 <span class="cl-l">Blog</span>
+        </a>
+        <a href="https://youtube.com/channel/UC6uB30zLgxoK35LANYYAAEg" target="_blank" class="clink">
+          <svg viewBox="0 0 24 24"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.54 3.5 12 3.5 12 3.5s-7.54 0-9.38.55A3.02 3.02 0 0 0 .5 6.19C0 8.04 0 12 0 12s0 3.96.5 5.81a3.02 3.02 0 0 0 2.12 2.14C4.46 20.5 12 20.5 12 20.5s7.54 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14C24 15.96 24 12 24 12s0-3.96-.5-5.81zM9.75 15.5v-7l6.25 3.5-6.25 3.5z"/></svg>
+          YouTube Channel <span class="cl-l">YouTube</span>
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <div class="vision-box">
+        <h4>🇮🇳 Long-Term Vision</h4>
+        <p>
+          My ultimate goal is to establish a world-class Research &amp; Development centre in India — a place where exceptional engineers and scientists tackle problems that matter, building technology that competes with the best in the world. If you share this vision or want to work on something meaningful, I'd love to connect.
+        </p>
+      </div>
+      <a href="resume.pdf" target="_blank" class="btn-fill" style="width:100%;justify-content:center;border-radius:3px;">
+        Download Resume / CV ↓
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-l">Built by <strong>Jash Shah</strong> · B.E. Electronics &amp; Instrumentation · BITS Pilani</div>
+  <div class="footer-r">
+    Source on <a href="https://github.com/Jash-2000/Jash-Shah.me" target="_blank">GitHub</a>
+    &nbsp;·&nbsp; Jash Shah ~ Personal Website
+  </div>
+</footer>
+
+<button id="scrollTop" title="Back to top">↑</button>
+
+<script>
+  /* navbar scroll */
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+    document.getElementById('scrollTop').classList.toggle('show', window.scrollY > 400);
+  });
+  document.getElementById('scrollTop').addEventListener('click', () =>
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  );
+
+  /* hamburger */
+  const ham = document.getElementById('ham');
+  const mobileNav = document.getElementById('mobileNav');
+  ham.addEventListener('click', () => {
+    const open = mobileNav.classList.toggle('open');
+    ham.classList.toggle('open', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  });
+  mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    mobileNav.classList.remove('open');
+    ham.classList.remove('open');
+    document.body.style.overflow = '';
+  }));
+
+  /* project filters */
+  function applyFilter(filter) {
+    document.querySelectorAll('.proj-card').forEach(c =>
+      c.classList.toggle('hidden', filter !== 'all' && c.dataset.domain !== filter)
+    );
+    document.querySelectorAll('.filter-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.filter === filter)
+    );
+  }
+  document.querySelectorAll('.filter-btn').forEach(btn =>
+    btn.addEventListener('click', () => applyFilter(btn.dataset.filter))
+  );
+  document.querySelectorAll('[data-filter]').forEach(el =>
+    el.addEventListener('click', e => {
+      const f = el.dataset.filter;
+      if (!f) return;
+      e.preventDefault();
+      applyFilter(f);
+      document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
+      mobileNav.classList.remove('open');
+      ham.classList.remove('open');
+      document.body.style.overflow = '';
+    })
+  );
+
+  /* active nav highlight */
+  const sections = document.querySelectorAll('section[id], #hero');
+  const navItems = document.querySelectorAll('a.nav-item');
+  new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting)
+        navItems.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+    });
+  }, { threshold: 0.35 }).observe && sections.forEach(s =>
+    new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting)
+          navItems.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+      });
+    }, { threshold: 0.35 }).observe(s)
+  );
+</script>
 </body>
 </html>
