@@ -492,6 +492,190 @@ img { display: block; max-width: 100%; }
 .proj-card:hover::before { opacity: 1; }
 .proj-card.hidden { display: none; }
 
+/* ── FLIP CARD — quadrotor (and future flippable cards) ── */
+.proj-card.flippable {
+  background: transparent;
+  border: none;
+  padding: 0;
+  perspective: 900px;
+  cursor: default;
+  /* keep the same grid footprint */
+  min-height: 220px;
+}
+/* kill the generic card styles on flippable wrapper */
+.proj-card.flippable::before { display: none; }
+.proj-card.flippable:hover { transform: none; box-shadow: none; border-color: transparent; }
+
+.flip-inner {
+  position: relative; width: 100%; height: 100%; min-height: 220px;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1);
+  border-radius: var(--r);
+}
+.proj-card.flippable:hover .flip-inner { transform: rotateY(180deg); }
+
+.flip-front,
+.flip-back {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+/* front = original card look */
+.flip-front {
+  background: var(--surface);
+  padding: 1.5rem;
+  display: flex; flex-direction: column;
+  transition: box-shadow 0.2s;
+}
+.proj-card.flippable:hover .flip-front { box-shadow: var(--shadow-lg); }
+.flip-front::after {
+  content: '⟳ hover';
+  position: absolute; bottom: 10px; right: 12px;
+  font-family: var(--mono); font-size: 0.58rem; color: var(--muted);
+  opacity: 0.6;
+}
+
+/* back = animation canvas */
+.flip-back {
+  background: #0d1117;
+  transform: rotateY(180deg);
+  display: flex; flex-direction: column;
+}
+
+/* ---- Quadrotor animation scene ---- */
+.quad-scene {
+  flex: 1; position: relative; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 60%, #0f1f2e 0%, #0d1117 70%);
+}
+
+/* ground grid */
+.quad-scene::before {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 40%;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.12) 1px, transparent 1px);
+  background-size: 20px 20px;
+  transform: perspective(120px) rotateX(55deg);
+  transform-origin: bottom center;
+}
+
+/* the drone body */
+.quad-body {
+  position: absolute;
+  left: 50%; top: 38%;
+  width: 34px; height: 10px;
+  transform: translate(-50%, -50%);
+  animation: quadHover 2.2s ease-in-out infinite;
+}
+
+@keyframes quadHover {
+  0%,100% { top: 38%; }
+  50%      { top: 34%; }
+}
+
+/* centre cube */
+.quad-body::before {
+  content: '';
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%,-50%);
+  width: 12px; height: 8px;
+  background: #c8cdd4;
+  border-radius: 2px;
+  box-shadow: 0 0 6px rgba(0,229,255,0.5);
+}
+
+/* four arms */
+.quad-arm {
+  position: absolute; top: 50%; height: 2px;
+  background: #7a8290; border-radius: 1px;
+  transform-origin: center;
+}
+.quad-arm:nth-child(1) { width: 14px; left: -1px; transform: translateY(-50%) rotate(-35deg); }
+.quad-arm:nth-child(2) { width: 14px; right: -1px; left: auto; transform: translateY(-50%) rotate(35deg); }
+.quad-arm:nth-child(3) { width: 14px; left: -1px; transform: translateY(-50%) rotate(35deg); }
+.quad-arm:nth-child(4) { width: 14px; right: -1px; left: auto; transform: translateY(-50%) rotate(-35deg); }
+
+/* propellers — one per corner */
+.quad-prop {
+  position: absolute; width: 16px; height: 4px;
+  border-radius: 2px; background: rgba(160,200,255,0.7);
+  transform-origin: center;
+}
+.quad-prop:nth-child(5) { top: -10px; left: -16px; animation: spin-cw  0.18s linear infinite; }
+.quad-prop:nth-child(6) { top: -10px; right: -16px; animation: spin-ccw 0.18s linear infinite; }
+.quad-prop:nth-child(7) { bottom: -6px; left: -16px; animation: spin-ccw 0.18s linear infinite; }
+.quad-prop:nth-child(8) { bottom: -6px; right: -16px; animation: spin-cw  0.18s linear infinite; }
+
+@keyframes spin-cw  { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes spin-ccw { from{transform:rotate(0deg)} to{transform:rotate(-360deg)} }
+
+/* prop blur circles */
+.quad-blur {
+  position: absolute; border-radius: 50%;
+  border: 1.5px solid rgba(120,180,255,0.35);
+  animation: quadHover 2.2s ease-in-out infinite; /* sync drift */
+}
+.quad-blur:nth-child(9)  { width:18px; height:18px; top:-14px; left:-20px; }
+.quad-blur:nth-child(10) { width:18px; height:18px; top:-14px; right:-20px; }
+.quad-blur:nth-child(11) { width:18px; height:18px; bottom:-10px; left:-20px; }
+.quad-blur:nth-child(12) { width:18px; height:18px; bottom:-10px; right:-20px; }
+
+/* thrust lines */
+.quad-thrust {
+  position: absolute; width: 1px;
+  background: linear-gradient(to bottom, rgba(0,229,255,0.7), transparent);
+  animation: thrustPulse 0.6s ease-in-out infinite alternate;
+  transform-origin: top center;
+}
+.quad-thrust:nth-child(13) { height:16px; top:16px; left:-11px; animation-delay:0s; }
+.quad-thrust:nth-child(14) { height:16px; top:16px; right:-11px; animation-delay:0.15s; }
+.quad-thrust:nth-child(15) { height:12px; bottom:12px; left:-11px; animation-delay:0.3s; }
+.quad-thrust:nth-child(16) { height:12px; bottom:12px; right:-11px; animation-delay:0.1s; }
+@keyframes thrustPulse { from{opacity:0.3;height:10px} to{opacity:1;height:20px} }
+
+/* shadow under drone */
+.quad-shadow {
+  position: absolute; left: 50%; bottom: 36%;
+  width: 28px; height: 5px; border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  transform: translateX(-50%);
+  animation: shadowPulse 2.2s ease-in-out infinite;
+}
+@keyframes shadowPulse {
+  0%,100% { width:28px; opacity:0.5; }
+  50%      { width:20px; opacity:0.3; }
+}
+
+/* PID graph panel */
+.quad-pid {
+  padding: 8px 12px 10px;
+  background: #0d1117;
+  border-top: 1px solid #1e2530;
+  flex-shrink: 0;
+}
+.pid-label {
+  font-family: var(--mono); font-size: 0.6rem; color: #4a9eff;
+  margin-bottom: 4px; letter-spacing: 0.08em;
+}
+.pid-graph {
+  width: 100%; height: 36px;
+  overflow: hidden; position: relative;
+}
+.pid-graph svg { width: 100%; height: 100%; }
+
+/* back card title */
+.quad-back-title {
+  position: absolute; top: 8px; left: 10px;
+  font-family: var(--mono); font-size: 0.62rem; color: rgba(255,255,255,0.5);
+  letter-spacing: 0.06em;
+}
+.quad-back-title span { color: #4a9eff; }
+
 .proj-top {
   display: flex; align-items: flex-start; justify-content: space-between;
   margin-bottom: 0.8rem;
@@ -1047,19 +1231,83 @@ footer {
         </div>
       </div>
 
-      <div class="proj-card" data-domain="robotics">
-        <div class="proj-top">
-          <span class="proj-domain-badge">Robotics</span>
-          <span class="proj-status">Complete</span>
-        </div>
-        <div class="proj-title">Quadrotor with Cascaded PID Stabilisation</div>
-        <div class="proj-desc">
-          Designed and tuned inner/outer PID control loops on a custom quadcopter frame.
-          Achieved stable hover with ±2cm position hold and autonomous waypoint navigation via MAVLink.
-        </div>
-        <div class="proj-chips">
-          <span class="proj-chip">STM32</span><span class="proj-chip">PID Control</span>
-          <span class="proj-chip">IMU Fusion</span><span class="proj-chip">MAVLink</span>
+      <!-- FLIPPABLE — Quadrotor PID -->
+      <div class="proj-card flippable" data-domain="robotics">
+        <div class="flip-inner">
+
+          <!-- FRONT -->
+          <div class="flip-front">
+            <div class="proj-top">
+              <span class="proj-domain-badge">Robotics</span>
+              <span class="proj-status">Complete</span>
+            </div>
+            <div class="proj-title">Quadrotor with Cascaded PID Stabilisation</div>
+            <div class="proj-desc">
+              Designed and tuned inner/outer PID control loops on a custom quadcopter frame.
+              Achieved stable hover with ±2cm position hold and autonomous waypoint navigation via MAVLink.
+            </div>
+            <div class="proj-chips">
+              <span class="proj-chip">STM32</span><span class="proj-chip">PID Control</span>
+              <span class="proj-chip">IMU Fusion</span><span class="proj-chip">MAVLink</span>
+            </div>
+          </div>
+
+          <!-- BACK — animated quadrotor scene -->
+          <div class="flip-back">
+            <div class="quad-scene">
+              <div class="quad-back-title">// <span>PID stabilisation</span> demo</div>
+
+              <!-- drone -->
+              <div class="quad-body">
+                <div class="quad-arm"></div>
+                <div class="quad-arm"></div>
+                <div class="quad-arm"></div>
+                <div class="quad-arm"></div>
+                <div class="quad-prop"></div>
+                <div class="quad-prop"></div>
+                <div class="quad-prop"></div>
+                <div class="quad-prop"></div>
+                <div class="quad-blur"></div>
+                <div class="quad-blur"></div>
+                <div class="quad-blur"></div>
+                <div class="quad-blur"></div>
+                <div class="quad-thrust"></div>
+                <div class="quad-thrust"></div>
+                <div class="quad-thrust"></div>
+                <div class="quad-thrust"></div>
+              </div>
+              <div class="quad-shadow"></div>
+            </div>
+
+            <!-- PID response graph -->
+            <div class="quad-pid">
+              <div class="pid-label">PID error response (altitude loop)</div>
+              <div class="pid-graph">
+                <svg viewBox="0 0 220 36" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- setpoint line -->
+                  <line x1="0" y1="18" x2="220" y2="18" stroke="rgba(255,255,255,0.15)" stroke-width="1" stroke-dasharray="4 3"/>
+                  <!-- PID response curve — overshoots then converges -->
+                  <polyline
+                    fill="none" stroke="#4a9eff" stroke-width="1.5" stroke-linejoin="round"
+                    points="
+                      0,34  10,34  14,32  18,22  22,8  26,4  30,6  35,14  40,18
+                      45,20  50,19  56,18  64,17.5  80,18  100,18  140,18  180,18  220,18
+                    "/>
+                  <!-- area fill under curve -->
+                  <polyline
+                    fill="rgba(74,158,255,0.08)" stroke="none"
+                    points="
+                      0,36  0,34  10,34  14,32  18,22  22,8  26,4  30,6  35,14
+                      40,18  45,20  50,19  56,18  64,17.5  80,18  220,18  220,36
+                    "/>
+                  <!-- settling markers -->
+                  <circle cx="56" cy="18" r="2" fill="#00e5a0" opacity="0.9"/>
+                  <text x="58" y="15" font-family="monospace" font-size="5" fill="#00e5a0" opacity="0.9">settled</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
